@@ -1,11 +1,10 @@
 import logging
-from fastapi import FastAPI, UploadFile, Form
-from fastapi.middleware.cors import CORSMiddleware
+import io
 import numpy as np
 from PIL import Image
-import io
-from utils.model_loader import get_model
-
+from fastapi import FastAPI, UploadFile, Form
+from fastapi.middleware.cors import CORSMiddleware
+from utils.model_loader import get_model, load_label_file
 app = FastAPI()
 logger = logging.getLogger("uvicorn")
 
@@ -31,22 +30,24 @@ async def predict(image: UploadFile, cropName: str = Form(...)):
     crop_name_map = {
         "potato": "감자",
         "tomato": "토마토",
-        "apple": "사과"
+        "apple": "사과",
+        "grape": "포도",
+        "peach": "복숭아",
+        "strawberry" : "딸기"
     }
     cropName_kor = crop_name_map.get(cropName)
     if not cropName_kor:
         return {"error": f"지원하지 않는 작물입니다: {cropName}"}
 
     model = get_model(cropName_kor)
-    class_mappings = {
-        "감자": ["겹둥근무늬병", "역병", "건강"]
-    }
-    class_list = class_mappings.get(cropName_kor)
-
     if not model:
         return {"error": f"'{cropName_kor}' 모델 파일이 존재하지 않습니다."}
-    if not class_list:
-        return {"error": f"'{cropName_kor}' {cropName}작물의 클래스 이름이 정의 되어 있지 않습니다."}
+
+    try:
+        class_dict = load_label_file(cropName_kor)  # dict로 로딩
+        inv_class_map = {v: k for k, v in class_dict.items()}
+    except FileNotFoundError:
+        return {"error": f"'{cropName_kor}' 작물의 라벨 파일이 존재하지 않습니다."}
 
     try:
         img_bytes = await image.read()
@@ -58,22 +59,18 @@ async def predict(image: UploadFile, cropName: str = Form(...)):
         predicted_class_idx = int(np.argmax(pred))
         confidence = round(float(np.max(pred)) * 100, 2)
 
-        # 인덱스 확인
-        if predicted_class_idx >= len(class_list):
-            predicted_class_name = "Unknown"
-        else:
-            predicted_class_name = class_list[predicted_class_idx]
+        predicted_class_name = inv_class_map.get(predicted_class_idx, "Unknown")
+        sickNameKor = predicted_class_name.split("_")[1] if "_" in predicted_class_name else predicted_class_name
 
         return {
             "cropName": cropName_kor,
             "predictedClassIndex": predicted_class_idx,
-            "sickNameKor": predicted_class_name,
+            "sickNameKor": sickNameKor,
             "confidence": confidence
         }
 
     except Exception as e:
         return {"error": f"이미지 처리 또는 예측 중 오류 발생: {str(e)}"}
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True)

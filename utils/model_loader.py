@@ -1,4 +1,5 @@
 import os
+import json
 from keras.models import load_model
 
 models = {}
@@ -18,3 +19,15 @@ def get_model(crop_name):
         models[crop_name] = load_model(model_path)
 
     return models[crop_name]
+
+
+def load_label_file(crop_name):
+    label_path = os.path.join(os.path.dirname(__file__), '..', 'models', f'mobilenetv2_labels_{crop_name}.json')
+    label_path = os.path.abspath(label_path)
+
+    if not os.path.exists(label_path):
+        raise FileNotFoundError(f"{label_path} 파일이 존재하지 않습니다.")
+
+    with open(label_path, 'r', encoding='utf-8') as f:
+        class_mapping = json.load(f)
+    return class_mapping
