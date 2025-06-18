@@ -22,7 +22,7 @@ class Predict:
         idx = int(np.argmax(prob))
 
         if confidence < 0.8:
-            return "판단불가", round(confidence * 100, 2)
+            return "판단보류", round(confidence * 100, 2)
 
         class_name_full = self.inv_class_map.get(idx, "Unknown")
         sick_name_kor = class_name_full.split("_")[1] if "_" in class_name_full else class_name_full
