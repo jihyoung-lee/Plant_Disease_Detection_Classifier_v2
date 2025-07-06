@@ -2,6 +2,9 @@
 
 This repository provides a FastAPI service that predicts plant diseases from images using pretrained MobileNetV2 models.
 
+## Dataset
+https://www.kaggle.com/datasets/vipoooool/new-plant-diseases-dataset
+
 ## Features
 
 - FastAPI-based HTTP API
