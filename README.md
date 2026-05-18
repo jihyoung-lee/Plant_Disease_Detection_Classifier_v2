@@ -5,6 +5,12 @@ This repository provides a FastAPI service that predicts plant diseases from ima
 ## Dataset
 https://www.kaggle.com/datasets/vipoooool/new-plant-diseases-dataset
 
+<img width="700" height="448" alt="image" src="https://github.com/user-attachments/assets/eb175dea-949f-4e94-b380-c10c67206513" />
+
+A MobileNetV2 pretrained backbone was used as a baseline model for the Apple(사과) disease classification task, achieving approximately 98% validation accuracy.
+However, since the PlantVillage dataset contains many images captured under controlled backgrounds and lighting conditions, there may be limitations in generalizing to real-world field environments.
+
+
 ## Features
 
 - FastAPI-based HTTP API
