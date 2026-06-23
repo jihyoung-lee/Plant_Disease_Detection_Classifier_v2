@@ -46,8 +46,8 @@ async def predict(image: UploadFile, crop_name: str = Form(...)):
         class_name, confidence = predictor.predict(img_array)
 
         return {
-            "cropName": crop_name_kor,
-            "sickNameKor": class_name,
+            "crop_name": crop_name_kor,
+            "sick_name_kor": class_name,
             "confidence": confidence
         }
 
