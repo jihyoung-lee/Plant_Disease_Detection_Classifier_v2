@@ -25,7 +25,6 @@ async def predict(image: UploadFile, crop_name: str = Form(...)):
 
     crop_name_map = {
         "potato": "감자",
-        "tomato": "토마토",
         "apple": "사과",
         "grape": "포도",
         "peach": "복숭아",
