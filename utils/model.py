@@ -9,13 +9,6 @@ class PlantDiseasePredictor:
         self.model = get_model(crop_name)
         self.inv_class_map = inv_class_map
 
-    def prepare_img(self, img_bytes, target=(224, 224)):
-        img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
-        img = img.resize(target)
-        img = np.array(img) / 255.0
-        img = np.expand_dims(img, axis=0)
-        return img
-
     def predict(self, img):
         prob = self.model.predict(img)[0]
         confidence = float(np.max(prob))

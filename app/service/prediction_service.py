@@ -1,5 +1,6 @@
 from utils.model_loader import load_label_file
 from utils.model import PlantDiseasePredictor
+from utils.image_utils import prepare_image
 from PIL import UnidentifiedImageError
 from app.exceptions import (
     UnsupportedCropException,
@@ -21,7 +22,7 @@ CROP_NAME_MAP = {
 class PredictionService:
     def predict(self,image_bytes: bytes, crop_name: str):
 
-        crop_name = crop_name.strip().lower()
+        crop_name = crop_name.strip().lower() # 공백제거 + 소문자 변환
         crop_name_kor = CROP_NAME_MAP.get(crop_name)
 
         if not crop_name_kor:
@@ -32,8 +33,12 @@ class PredictionService:
         except FileNotFoundError as exc:
             raise LabelFileNotFoundException(crop_name_kor) from exc
 
-
         inv_class_map = {v: k for k, v in label_dict.items()}
+
+        try:
+            img_array = prepare_image(image_bytes)
+        except (UnidentifiedImageError, OSError, ValueError) as exc:
+            raise InvalidImageException() from exc
 
         try:
             predictor = PlantDiseasePredictor(crop_name_kor, inv_class_map)
@@ -41,11 +46,6 @@ class PredictionService:
             raise ModelFileNotFoundException(crop_name_kor) from exc
         except Exception as exc:
             raise ModelLoadFailedException(crop_name_kor) from exc
-
-        try:
-            img_array = predictor.prepare_img(image_bytes)
-        except (UnidentifiedImageError, OSError, ValueError) as exc:
-            raise InvalidImageException() from exc
 
         try:
             sick_name_kor, confidence = predictor.predict(img_array)
