@@ -20,7 +20,7 @@ app.add_middleware(
 async def root():
     return {"message": "병해충 예측 API입니다."}
 
-@app.post("/predict")
+@app.post("/predict", response_model=PredictionResponse)
 async def predict(image: UploadFile, crop_name: str = Form(...)):
     crop_name = crop_name.strip()
 
