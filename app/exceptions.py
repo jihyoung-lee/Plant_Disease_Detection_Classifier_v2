@@ -42,7 +42,7 @@ class PredictionFailedException(ApiException):
             code="PREDICTION_FAILED",
             detail="예측에 실패했습니다."
         )
-        
+
 class EmptyImageException(ApiException):
     def __init__(self):
         super().__init__(
@@ -76,4 +76,12 @@ class ModelLoadFailedException(ApiException):
             status_code=500,
             code="MODEL_LOAD_FAILED",
             detail=f"{crop_name} 모델을 불러오지 못했습니다.",
+        )
+
+class ImageTooLargeException(ApiException):
+    def __init__(self):
+        super().__init__(
+            status_code=413,
+            code="FILE_TOO_LARGE",
+            detail="이미지 파일 용량 초과"
         )

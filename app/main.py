@@ -12,7 +12,7 @@ from app.exception_handlers import (
 from app.exceptions import (
     ApiException,
     EmptyImageException,
-    UnsupportedImageTypeException,
+    UnsupportedImageTypeException, ImageTooLargeException,
 )
 
 app = FastAPI()
@@ -29,6 +29,7 @@ app.add_exception_handler(
     Exception,
     global_exception_handler
 )
+
 prediction_service = PredictionService()
 
 # CORS 설정
@@ -50,7 +51,12 @@ async def predict(image: UploadFile, crop_name: str = Form(...)):
         raise UnsupportedImageTypeException(
             image.content_type or "unknown"
         )
+
+    max_file_size = 10 * 1024 * 1024  # 10MB
+
     image_bytes = await image.read()
+    if len(image_bytes) > max_file_size:
+        raise ImageTooLargeException()
     if not image_bytes:
         raise EmptyImageException()
 
