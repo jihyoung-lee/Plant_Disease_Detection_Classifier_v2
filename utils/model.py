@@ -3,7 +3,7 @@ from PIL import Image
 import numpy as np
 from utils.model_loader import get_model
 
-class Predict:
+class PlantDiseasePredictor:
     def __init__(self, crop_name, inv_class_map):
         self.crop_name = crop_name
         self.model = get_model(crop_name)

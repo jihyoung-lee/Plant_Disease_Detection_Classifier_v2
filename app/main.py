@@ -2,7 +2,7 @@ import logging
 from fastapi import FastAPI, UploadFile, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from utils.model_loader import load_label_file
-from utils.model import Predict
+from utils.model import PlantDiseasePredictor
 from app.schemas.prediction import PredictionResponse, PredictionData
 
 app = FastAPI()
@@ -42,7 +42,7 @@ async def predict(image: UploadFile, crop_name: str = Form(...)):
     try:
         label_dict = load_label_file(crop_name_kor)
         inv_class_map = {v: k for k, v in label_dict.items()}
-        predictor = Predict(crop_name_kor, inv_class_map)
+        predictor = PlantDiseasePredictor(crop_name_kor, inv_class_map)
 
         img_bytes = await image.read()
         img_array = predictor.prepare_img(img_bytes)
