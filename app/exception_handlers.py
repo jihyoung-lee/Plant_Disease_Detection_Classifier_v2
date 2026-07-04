@@ -3,6 +3,7 @@ import logging
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from fastapi.encoders import jsonable_encoder
 
 from app.exceptions import ApiException
 
@@ -12,7 +13,7 @@ async def validation_exception_handler(
     request: Request,
     exc: RequestValidationError,
 ):
-    errors = exc.errors()
+    errors = jsonable_encoder(exc.errors())
 
     first_error = errors[0] if errors else {}
     field = first_error.get("loc", ["unknown"])[-1]
