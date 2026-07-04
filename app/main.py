@@ -3,7 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import run_in_threadpool
 from app.service.prediction_service import PredictionService
 from app.schemas.prediction import PredictionResponse, PredictionData
-from app.exception_handlers import api_exception_handler
+from app.exception_handlers import (
+    api_exception_handler,
+    global_exception_handler,
+)
 from app.exceptions import (
     ApiException,
     EmptyImageException,
@@ -16,7 +19,10 @@ app.add_exception_handler(
     ApiException,
     api_exception_handler
 )
-
+app.add_exception_handler(
+    Exception,
+    global_exception_handler
+)
 prediction_service = PredictionService()
 
 # CORS 설정
