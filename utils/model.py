@@ -10,7 +10,7 @@ class PlantDiseasePredictor:
         self.inv_class_map = inv_class_map
 
     def predict(self, img):
-        prob = self.model.predict(img)[0]
+        prob = self.model.predict(img, verbose=0)[0]
         confidence = float(np.max(prob))
         idx = int(np.argmax(prob))
 
