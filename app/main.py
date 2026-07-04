@@ -1,6 +1,4 @@
-import logging
-
-from fastapi import FastAPI, UploadFile, Form, HTTPException
+from fastapi import FastAPI, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from app.service.prediction_service import PredictionService
 from app.schemas.prediction import PredictionResponse, PredictionData
@@ -17,8 +15,6 @@ app.add_exception_handler(
     ApiException,
     api_exception_handler
 )
-
-logger = logging.getLogger("uvicorn")
 
 prediction_service = PredictionService()
 

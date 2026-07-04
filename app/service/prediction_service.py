@@ -6,7 +6,7 @@ from app.exceptions import (
     LabelFileNotFoundException,
     ModelFileNotFoundException,
     InvalidImageException,
-    PredictionFailedException,
+    PredictionFailedException, ModelLoadFailedException,
 )
 
 
@@ -39,6 +39,8 @@ class PredictionService:
             predictor = PlantDiseasePredictor(crop_name_kor, inv_class_map)
         except FileNotFoundError as exc:
             raise ModelFileNotFoundException(crop_name_kor) from exc
+        except Exception as exc:
+            raise ModelLoadFailedException(crop_name_kor) from exc
 
         try:
             img_array = predictor.prepare_img(image_bytes)
