@@ -3,7 +3,7 @@ from fastapi import FastAPI, UploadFile, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from utils.model_loader import load_label_file
 from utils.model import Predict
-from schemas.prediction import PredictionResponse, PredictionData
+from app.schemas.prediction import PredictionResponse, PredictionData
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn")
