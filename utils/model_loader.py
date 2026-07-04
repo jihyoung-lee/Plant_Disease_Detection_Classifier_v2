@@ -1,8 +1,12 @@
 import os
 import json
+import threading
 from keras.models import load_model
 
 models = {}
+
+model_lock = threading.Lock()
+
 
 def get_model(crop_name):
     # app/models 폴더에 있는 모델 파일 경로 계산
@@ -12,9 +16,10 @@ def get_model(crop_name):
     if not os.path.exists(model_path):
         raise FileNotFoundError(f"모델 파일이 존재하지 않습니다: {model_path}")
 
-    if crop_name not in models:
-        print(f"모델 로딩 중: {model_path}")
-        models[crop_name] = load_model(model_path)
+    with model_lock:
+        if crop_name not in models:
+            print(f"모델 로딩 중: {model_path}")
+            models[crop_name] = load_model(model_path)
 
     return models[crop_name]
 
