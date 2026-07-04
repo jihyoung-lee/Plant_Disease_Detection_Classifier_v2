@@ -48,7 +48,7 @@ class PredictionService:
         try:
             sick_name_kor, confidence = predictor.predict(img_array)
         except Exception as exc:
-            raise PredictionFailedException(crop_name_kor) from exc
+            raise PredictionFailedException() from exc
 
         return {
             "crop_name": crop_name_kor,
