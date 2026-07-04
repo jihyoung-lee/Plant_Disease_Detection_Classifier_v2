@@ -40,6 +40,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+max_file_size = 10 * 1024 * 1024  # 10MB
+
 @app.get("/")
 async def root():
     return {"message": "병해충 예측 API입니다."}
@@ -52,9 +54,7 @@ async def predict(image: UploadFile, crop_name: str = Form(...)):
             image.content_type or "unknown"
         )
 
-    max_file_size = 10 * 1024 * 1024  # 10MB
-
-    image_bytes = await image.read()
+    image_bytes = await image.read(max_file_size + 1)
     if len(image_bytes) > max_file_size:
         raise ImageTooLargeException()
     if not image_bytes:
