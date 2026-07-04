@@ -1,8 +1,9 @@
 import logging
-from fastapi import FastAPI, UploadFile, Form
+from fastapi import FastAPI, UploadFile, Form, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from utils.model_loader import load_label_file
 from utils.model import Predict
+from schemas.prediction import PredictionResponse, PredictionData
 
 app = FastAPI()
 logger = logging.getLogger("uvicorn")
@@ -32,8 +33,11 @@ async def predict(image: UploadFile, crop_name: str = Form(...)):
     }
 
     crop_name_kor = crop_name_map.get(crop_name)
+
     if not crop_name_kor:
-        return {"error": f"지원하지 않는 작물입니다: {crop_name}"}
+        raise HTTPException (
+            status_code=400,
+            detail=f"지원하지 않는 작물입니다: {crop_name}")
 
     try:
         label_dict = load_label_file(crop_name_kor)
@@ -44,16 +48,27 @@ async def predict(image: UploadFile, crop_name: str = Form(...)):
         img_array = predictor.prepare_img(img_bytes)
         class_name, confidence = predictor.predict(img_array)
 
-        return {
-            "crop_name": crop_name_kor,
-            "sick_name_kor": class_name,
-            "confidence": confidence
-        }
+        return PredictionResponse(
+            success=True,
+            message="예측 완료.",
+            data=PredictionData(
+                crop_name=crop_name_kor,
+                sick_name_kor=class_name,
+                confidence=confidence,
+            ),
+        )
 
     except FileNotFoundError:
-        return {"error": f"'{crop_name_kor}' 작물의 라벨 파일이 존재하지 않습니다."}
+        raise HTTPException(
+            status_code=500,
+            detail=f"'{crop_name_kor}' 작물의 라벨 파일이 존재하지 않습니다."
+        )
+
     except Exception as e:
-        return {"error": f"이미지 처리 또는 예측 중 오류 발생: {str(e)}"}
+        raise HTTPException(
+            status_code=500,
+            detail="이미지 처리 또는 예측 중 오류가 발생했습니다."
+        )
 
 if __name__ == "__main__":
     import uvicorn
