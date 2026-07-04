@@ -18,16 +18,30 @@ Minor misclassifications occurred mainly in the Apple Scab category, which may b
 
 - FastAPI-based HTTP API
 - Pretrained Keras models located in `models/`
-- Supports crops such as potato, tomato, apple, grape, peach and strawberry (in Korean labels)
+- Supports potato, apple, grape, peach, and strawberry crops (with Korean prediction labels)
 
 ## Requirements
 
-- Python 3.8+
-- fastapi
-- uvicorn
-- keras
-- pillow
-- numpy
+- Python 3.12+
+- See `requirements.txt` for pinned package versions
+
+## Installation
+
+```bash
+python -m venv .venv
+```
+
+Activate the virtual environment on Windows:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+Then install the dependencies:
+
+```bash
+python -m pip install -r requirements.txt
+```
 
 ## Running the API
 
@@ -36,4 +50,16 @@ uvicorn app.main:app --reload
 ```
 
 Then access `http://localhost:8000` or use the `/predict` endpoint with an image file and crop name.
+
+Supported `crop_name` values are:
+
+- `potato`
+- `apple`
+- `grape`
+- `peach`
+- `strawberry`
+
+Manual API requests for successful prediction, empty files, unsupported file types,
+and oversized files are available in `test_main.http`. Update the image paths at the
+top of that file before running the success and oversized-file requests.
 
