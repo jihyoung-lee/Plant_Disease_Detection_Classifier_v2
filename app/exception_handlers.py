@@ -2,10 +2,35 @@ import logging
 
 from fastapi import Request
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 
 from app.exceptions import ApiException
 
 logger = logging.getLogger("uvicorn")
+
+async def validation_exception_handler(
+    request: Request,
+    exc: RequestValidationError,
+):
+    errors = exc.errors()
+
+    first_error = errors[0] if errors else {}
+    field = first_error.get("loc", ["unknown"])[-1]
+    message = first_error.get("msg", "Validation failed.")
+
+    return JSONResponse(
+        status_code=422,
+        content={
+            "success": False,
+            "message": "Validation failed.",
+            "data": None,
+            "error": {
+                "code": "VALIDATION_ERROR",
+                "message": f"{field}: {message}",
+                "details": errors,
+            },
+        },
+    )
 
 async def api_exception_handler(
         request: Request,
