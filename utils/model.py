@@ -1,5 +1,3 @@
-import io
-from PIL import Image
 import numpy as np
 from utils.model_loader import get_model
 

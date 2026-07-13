@@ -1,35 +1,66 @@
-import os
 import json
 import threading
-from keras.models import load_model
+from huggingface_hub import hf_hub_download
+from huggingface_hub.errors import (
+    EntryNotFoundError,
+    HFValidationError,
+    HfHubHTTPError,
+    LocalEntryNotFoundError,
+    RepositoryNotFoundError,
+    RevisionNotFoundError,
+)
+
+
+HF_MODEL_REPO = "jihyoung97/plant-disease-models"
+HF_MODEL_SUBFOLDER = "models"
 
 models = {}
+labels = {}
 
 model_lock = threading.Lock()
+label_lock = threading.Lock()
 
 
-def get_model(crop_name):
-    # app/models 폴더에 있는 모델 파일 경로 계산
-    model_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), '..', 'models', f'mobilenetv2_best_{crop_name}.h5')
-    )
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f"모델 파일이 존재하지 않습니다: {model_path}")
+def download_hub_file(filename: str) -> str:
+    try:
+        return hf_hub_download(
+            repo_id=HF_MODEL_REPO,
+            filename=filename,
+            subfolder=HF_MODEL_SUBFOLDER,
+        )
+    except (
+        EntryNotFoundError,
+        HFValidationError,
+        HfHubHTTPError,
+        LocalEntryNotFoundError,
+        RepositoryNotFoundError,
+        RevisionNotFoundError,
+    ) as exc:
+        raise FileNotFoundError(f"Hugging Face 파일을 불러올 수 없습니다: {filename}") from exc
+
+
+def get_model(crop_name: str):
+    if crop_name in models:
+        return models[crop_name]
 
     with model_lock:
         if crop_name not in models:
-            print(f"모델 로딩 중: {model_path}")
+            from keras.models import load_model
+
+            model_path = download_hub_file(f"mobilenetv2_best_{crop_name}.h5")
             models[crop_name] = load_model(model_path)
 
     return models[crop_name]
 
-def load_label_file(crop_name):
-    label_path = os.path.join(os.path.dirname(__file__), '..', 'models', f'mobilenetv2_labels_{crop_name}.json')
-    label_path = os.path.abspath(label_path)
 
-    if not os.path.exists(label_path):
-        raise FileNotFoundError(f"{label_path} 파일이 존재하지 않습니다.")
+def load_label_file(crop_name: str):
+    if crop_name in labels:
+        return labels[crop_name]
 
-    with open(label_path, 'r', encoding='utf-8') as f:
-        class_mapping = json.load(f)
-    return class_mapping
+    with label_lock:
+        if crop_name not in labels:
+            label_path = download_hub_file(f"mobilenetv2_labels_{crop_name}.json")
+            with open(label_path, "r", encoding="utf-8") as file:
+                labels[crop_name] = json.load(file)
+
+    return labels[crop_name]
